@@ -1,9 +1,10 @@
 package com.example.rest_crud_app.rest;
 
 import com.example.rest_crud_app.entity.Student;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.annotation.PostConstruct;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,17 +14,54 @@ import java.util.List;
 
 public class StudentRestController {
 
-    //definim endpoint-ul pentru /students
-    @GetMapping("/students")
-    public List<Student> getStudents(){
-        List<Student> theStudents = new ArrayList<>();
+    private List<Student> theStudents;
+    @PostConstruct
+    public void loadData() {
+
+        theStudents = new ArrayList<>();
 
         theStudents.add(new Student("Munteanu","Eugen"));
         theStudents.add(new Student("Ojog", "Maria"));
         theStudents.add(new Student("Gonzales", "Pedro"));
-        
+
+    }
+    @GetMapping("/students/{studentId}")
+    public Student getStudent(@PathVariable int studentId){
+
+
+        //verificam din nou studentID si dimensiunea listei
+        if ( (studentId >= theStudents.size())  ||  (studentId < 0)) {
+            throw new StudentNotFoundExeption("Student id not found - " + studentId);
+        }
+
+        return theStudents.get(studentId);
+    }
+
+
+
+    //definim endpoint-ul pentru /students
+    @GetMapping("/students")
+    public List<Student> getStudents(){
+
         return theStudents;
     }
 
+    //exception handler
+
+    @ExceptionHandler
+    public ResponseEntity<StudentErrorResponse> handlException(StudentNotFoundExeption ex) {
+
+        //create StudentErrorResponse
+
+        StudentErrorResponse error = new StudentErrorResponse();
+
+        error.setStatus(HttpStatus.NOT_FOUND.value());
+        error.setMessage(ex.getMessage());
+        error.setTimeStamp(System.currentTimeMillis());
+
+        //return ResponseEntity
+
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
 
 }
