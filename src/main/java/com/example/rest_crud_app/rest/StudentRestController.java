@@ -49,7 +49,7 @@ public class StudentRestController {
     //exception handler
 
     @ExceptionHandler
-    public ResponseEntity<StudentErrorResponse> handlException(StudentNotFoundExeption ex) {
+    public ResponseEntity<StudentErrorResponse> handleException(StudentNotFoundExeption ex) {
 
         //create StudentErrorResponse
 
@@ -63,5 +63,21 @@ public class StudentRestController {
 
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
+
+
+    @ExceptionHandler
+    public ResponseEntity<StudentErrorResponse> handleException(Exception ex) {
+
+        StudentErrorResponse error = new StudentErrorResponse();
+
+        error.setStatus(HttpStatus.BAD_REQUEST.value());
+        error.setMessage("Propriul nostru text pentru eroare");
+        error.setTimeStamp(System.currentTimeMillis());
+
+        //return ResponseEntity
+
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
 
 }
